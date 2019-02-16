@@ -40,14 +40,14 @@ $ operator-sdk add api --api-version=gremlin.kubedex.io/v1alpha1 --kind=AppServi
 # Add a new controller that watches for AppService
 $ operator-sdk add controller --api-version=gremlin.kubedex.io/v1alpha1 --kind=AppService
 
-# Build and push the gremlin-operator image to a public registry such as quay.io
-$ operator-sdk build quay.io/Kubedex/gremlin-operator
-$ docker push quay.io/Kubedex/gremlin-operator
+# Build and push the gremlin-operator image to a public registry such as docker.io
+$ operator-sdk build docker.io/Kubedex/gremlin-operator
+$ docker push docker.io/Kubedex/gremlin-operator
 
 # Update the operator manifest to use the built image name (if you are performing these steps on OSX, see note below)
-$ sed -i 's|REPLACE_IMAGE|quay.io/Kubedex/gremlin-operator|g' deploy/operator.yaml
+$ sed -i 's|REPLACE_IMAGE|docker.io/Kubedex/gremlin-operator|g' deploy/operator.yaml
 # On OSX use:
-$ sed -i "" 's|REPLACE_IMAGE|quay.io/Kubedex/gremlin-operator|g' deploy/operator.yaml
+$ sed -i "" 's|REPLACE_IMAGE|docker.io/Kubedex/gremlin-operator|g' deploy/operator.yaml
 
 # Setup Service Account
 $ kubectl create -f deploy/service_account.yaml
@@ -55,13 +55,13 @@ $ kubectl create -f deploy/service_account.yaml
 $ kubectl create -f deploy/role.yaml
 $ kubectl create -f deploy/role_binding.yaml
 # Setup the CRD
-$ kubectl create -f deploy/crds/app_v1alpha1_gremlinservice_crd.yaml
+$ kubectl create -f deploy/crds/gremlin_v1alpha1_gremlin_crd.yaml
 # Deploy the gremlin-operator
 $ kubectl create -f deploy/operator.yaml
 
 # Create an GremlinService CR
 # The default controller will watch for GremlinService objects and create a pod for each CR
-$ kubectl create -f deploy/crds/app_v1alpha1_gremlinservice_cr.yaml
+$ kubectl create -f deploy/crds/gremlin_v1alpha1_appservice_cr.yaml
 
 # Verify that a pod is created
 $ kubectl get pod -l app=example-gremlinservice
@@ -87,10 +87,10 @@ Spec:
   Size:  3
 
 # Cleanup
-$ kubectl delete -f deploy/crds/app_v1alpha1_gremlinservice_cr.yaml
+$ kubectl delete -f deploy/crds/gremlin_v1alpha1_gremlin_cr.yaml
 $ kubectl delete -f deploy/operator.yaml
 $ kubectl delete -f deploy/role.yaml
 $ kubectl delete -f deploy/role_binding.yaml
 $ kubectl delete -f deploy/service_account.yaml
-$ kubectl delete -f deploy/crds/app_v1alpha1_gremlinservice_crd.yaml
+$ kubectl delete -f deploy/crds/gremlin_v1alpha1_gremlin_crd.yaml
 ```
