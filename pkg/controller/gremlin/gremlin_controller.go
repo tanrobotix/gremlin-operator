@@ -3,6 +3,7 @@ package gremlin
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	gremlinv1alpha1 "github.com/Kubedex/gremlin-operator/pkg/apis/gremlin/v1alpha1"
 
@@ -106,40 +107,38 @@ func (r *ReconcileGremlin) Reconcile(request reconcile.Request) (reconcile.Resul
 	podList := &v1.PodList{}
 	// Return all pods in the request namespace with a label of `gremlin.gremlin.kubedex.com/attack=<value>`
 	opts := &client.ListOptions{}
-	opts.SetFieldSelector(fmt.Sprintf("metadata.annotations.gremlin.gremlin.kubedex.com/attack=%s", "cpu"))
+	opts.SetLabelSelector(fmt.Sprintf("gremlin.gremlin.kubedex.com/enabled=%s", "true"))
 	err = r.client.List(context.TODO(), opts, podList)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	teamID := ""
-	if val, ok := instance.ObjectMeta.Annotations["gremlin.gremlin.kubedex.com/team_id"]; ok {
-		teamID = val
-		reqLogger.Info("Unable to schedule attack job team id not found, Please check gremlin.gremlin.kubedex.com/team_id")
-	}
-
 	for _, pod := range podList.Items {
 		// check the attack is for single container or multiple containers
 		attackVector := "all"
-		if attackVector, ok := pod.Annotations["gremlin.gremlin.kubedex.com/container"]; ok {
-			reqLogger.Info("The attack selected for pod", attackVector)
+		if av, ok := pod.Annotations["gremlin.gremlin.kubedex.com/container"]; ok {
+			attackVector = av
+			reqLogger.Info("Attack selected", "Pod", av)
 		}
-		reqLogger.Info("The attack vector selected", attackVector)
+		reqLogger.Info("Attack vector selected", "Pod", attackVector)
 
 		// if attack is for all the containers, schedule pods for attack
 		if attackVector == "all" {
 			for _, containerStatus := range pod.Status.ContainerStatuses {
+				// Replace docker:// from container id
+				containerID := strings.Replace(containerStatus.ContainerID, "docker://", "", 1)
 				// Create a k8s job to attack pod container
-				job := newJobForAttack(instance, containerStatus.Name, containerStatus.ContainerID, pod.Namespace, pod.Spec.NodeName, teamID)
+				job := newJobForAttack(instance, containerStatus.Name, containerID,
+					pod.Namespace, pod.Spec.NodeName, instance.Spec.TeamID)
 
-				reqLogger.Info("Sheduling attack job", job.Name, " to attack Container", containerStatus.Name)
+				reqLogger.Info("Sheduling attack", "Job.Name", job.Name, "Job.Container", containerStatus.Name, "ContainerID", containerID)
 
 				// Set Gremlin instance as the owner and controller
 				if err := controllerutil.SetControllerReference(instance, job, r.scheme); err != nil {
 					return reconcile.Result{}, err
 				}
 
-				reqLogger.Info("Creating a new Job", "Job.Namespace", job.Namespace, "Pod.Name", job.Name)
+				reqLogger.Info("Creating a new Job", "Job.Namespace", job.Namespace, "Job.Name", job.Name)
 				err = r.client.Create(context.TODO(), job)
 				if err != nil {
 					return reconcile.Result{}, err
@@ -168,9 +167,9 @@ func newJobForAttack(cr *gremlinv1alpha1.Gremlin, container string, containerID 
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:    cr.Name + container + "-job-pod",
-							Image:   "gremlin/gremlin",
-							Command: []string{"attack-container", containerID, "cpu"},
+							Name:  cr.Name + container + "-job-pod",
+							Image: "gremlin/gremlin",
+							Args:  []string{"attack-container", containerID, "cpu"},
 							SecurityContext: &corev1.SecurityContext{
 								Capabilities: &corev1.Capabilities{
 									Add: []corev1.Capability{"NET_ADMIN", "SYS_BOOT", "SYS_TIME", "KILL"},
@@ -178,12 +177,12 @@ func newJobForAttack(cr *gremlinv1alpha1.Gremlin, container string, containerID 
 							},
 							Env: []corev1.EnvVar{
 								{
-									Name:  teamID,
-									Value: "65bd4dc7-8fdb-5106-af04-c89371453e8a",
+									Name:  "GREMLIN_TEAM_ID",
+									Value: teamID,
 								},
 								{
 									Name:  "GREMLIN_TEAM_CERTIFICATE_OR_FILE",
-									Value: "///var/lib/gremlin/cert/gremlin.cert",
+									Value: "file:///var/lib/gremlin/cert/gremlin.cert",
 								},
 								{
 									Name:  "GREMLIN_TEAM_PRIVATE_KEY_OR_FILE",
@@ -208,10 +207,6 @@ func newJobForAttack(cr *gremlinv1alpha1.Gremlin, container string, containerID 
 									MountPath: "/var/log/gremlin",
 								},
 								{
-									Name:      "shutdown-trigger",
-									MountPath: "/sysrq",
-								},
-								{
 									Name:      "gremlin-cert",
 									MountPath: "/var/lib/gremlin/cert",
 									ReadOnly:  true,
@@ -219,6 +214,7 @@ func newJobForAttack(cr *gremlinv1alpha1.Gremlin, container string, containerID 
 							},
 						},
 					},
+					RestartPolicy: corev1.RestartPolicyNever,
 					// set the exact node we want to run this attack
 					NodeName:    node,
 					HostNetwork: true,
@@ -244,7 +240,7 @@ func newJobForAttack(cr *gremlinv1alpha1.Gremlin, container string, containerID 
 							Name: "gremlin-logs",
 							VolumeSource: corev1.VolumeSource{
 								HostPath: &corev1.HostPathVolumeSource{
-									Path: "/proc/sysrq-trigger",
+									Path: "/var/log/gremlin",
 								},
 							},
 						},

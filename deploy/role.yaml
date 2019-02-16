@@ -7,6 +7,7 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - batch
   - pods
   - services
   - endpoints
@@ -14,6 +15,13 @@ rules:
   - events
   - configmaps
   - secrets
+  verbs:
+  - '*'
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  - cronjobs
   verbs:
   - '*'
 - apiGroups:

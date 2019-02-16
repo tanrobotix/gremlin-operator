@@ -61,9 +61,14 @@ $ kubectl create -f deploy/operator.yaml
 
 # Create an GremlinService CR
 # The default controller will watch for GremlinService objects and create a pod for each CR
-$ kubectl create -f deploy/crds/gremlin_v1alpha1_appservice_cr.yaml
+$ kubectl create -f deploy/crds/gremlin_v1alpha1_gremlin_cr.yaml
 
-# Verify that a pod is created
+# verify CR is created
+$ kubectl get gremlins.gremlin.kubedex.com
+NAME              AGE
+example-gremlin   32s
+
+# Verify that a job is created
 $ kubectl get pod -l app=example-gremlinservice
 NAME                     READY     STATUS    RESTARTS   AGE
 example-appservice-pod   1/1       Running   0          1m

@@ -2,9 +2,5 @@ apiVersion: gremlin.kubedex.com/v1alpha1
 kind: Gremlin
 metadata:
   name: example-gremlin
-  annotations: {
-    "metadata.annotations.gremlin.gremlin.kubedex.com/team_id" : "TEAM_ID",
-  }
 spec:
-  # Add fields here
-  size: 3
+  team_id: ""
