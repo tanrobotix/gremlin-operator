@@ -41,13 +41,13 @@ $ operator-sdk add api --api-version=gremlin.kubedex.io/v1alpha1 --kind=AppServi
 $ operator-sdk add controller --api-version=gremlin.kubedex.io/v1alpha1 --kind=AppService
 
 # Build and push the gremlin-operator image to a public registry such as docker.io
-$ operator-sdk build docker.io/Kubedex/gremlin-operator
-$ docker push docker.io/Kubedex/gremlin-operator
+$ operator-sdk build kubedex/gremlin-operator
+$ docker push kubedex/gremlin-operator
 
 # Update the operator manifest to use the built image name (if you are performing these steps on OSX, see note below)
-$ sed -i 's|REPLACE_IMAGE|docker.io/Kubedex/gremlin-operator|g' deploy/operator.yaml
+$ sed -i 's|REPLACE_IMAGE|kubedex/gremlin-operator|g' deploy/operator.yaml
 # On OSX use:
-$ sed -i "" 's|REPLACE_IMAGE|docker.io/Kubedex/gremlin-operator|g' deploy/operator.yaml
+$ sed -i "" 's|REPLACE_IMAGE|kubedex/gremlin-operator|g' deploy/operator.yaml
 
 # Setup Service Account
 $ kubectl create -f deploy/service_account.yaml

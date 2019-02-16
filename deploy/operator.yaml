@@ -16,7 +16,7 @@ spec:
       containers:
         - name: gremlin-operator
           # Replace this with the built image name
-          image: REPLACE_IMAGE
+          image: kubedex/gremlin-operator
           command:
           - gremlin-operator
           imagePullPolicy: Always
