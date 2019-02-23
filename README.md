@@ -61,7 +61,15 @@ $ kubectl create -f deploy/operator.yaml
 
 # Create an GremlinService CR
 # The default controller will watch for GremlinService objects and create a pod for each CR
-$ kubectl create -f deploy/crds/gremlin_v1alpha1_gremlin_cr.yaml
+$ kubectl create -f deploy/crds/gremlin_v1alpha1_gremlin_cr_cpu.yaml
+$ kubectl create -f deploy/crds/gremlin_v1alpha1_gremlin_cr_disk.yaml
+$ kubectl create -f deploy/crds/gremlin_v1alpha1_gremlin_cr_dns.yaml
+$ kubectl create -f deploy/crds/gremlin_v1alpha1_gremlin_cr_io.yaml
+$ kubectl create -f deploy/crds/gremlin_v1alpha1_gremlin_cr_latency.yaml
+$ kubectl create -f deploy/crds/gremlin_v1alpha1_gremlin_cr_memory.yaml
+$ kubectl create -f deploy/crds/gremlin_v1alpha1_gremlin_cr_packet_loss.yaml
+$ kubectl create -f deploy/crds/gremlin_v1alpha1_gremlin_cr_process_killer.yaml
+$ kubectl create -f deploy/crds/gremlin_v1alpha1_gremlin_cr_shutdown.yaml
 
 # verify CR is created
 $ kubectl get gremlins.gremlin.kubedex.com
@@ -92,7 +100,16 @@ Spec:
   Size:  3
 
 # Cleanup
-$ kubectl delete -f deploy/crds/gremlin_v1alpha1_gremlin_cr.yaml
+$ kubectl delete -f deploy/crds/gremlin_v1alpha1_gremlin_cr_cpu.yaml
+$ kubectl delete -f deploy/crds/gremlin_v1alpha1_gremlin_cr_disk.yaml
+$ kubectl delete -f deploy/crds/gremlin_v1alpha1_gremlin_cr_dns.yaml
+$ kubectl delete -f deploy/crds/gremlin_v1alpha1_gremlin_cr_io.yaml
+$ kubectl delete -f deploy/crds/gremlin_v1alpha1_gremlin_cr_latency.yaml
+$ kubectl delete -f deploy/crds/gremlin_v1alpha1_gremlin_cr_memory.yaml
+$ kubectl delete -f deploy/crds/gremlin_v1alpha1_gremlin_cr_packet_loss.yaml
+$ kubectl delete -f deploy/crds/gremlin_v1alpha1_gremlin_cr_process_killer.yaml
+$ kubectl delete -f deploy/crds/gremlin_v1alpha1_gremlin_cr_shutdown.yaml
+
 $ kubectl delete -f deploy/operator.yaml
 $ kubectl delete -f deploy/role.yaml
 $ kubectl delete -f deploy/role_binding.yaml
