@@ -10,9 +10,9 @@ spec:
   process: '^abc'
   signal: -9
   group: adm
-  group: user
+  user: user
   newest: true
-  newest: false
+  oldest: false
   exact: true
   kill_children: true
   full: false

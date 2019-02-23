@@ -8,5 +8,5 @@ spec:
   gremlin: dns
   length: 60
   device: etch0
-  ipaddress: 192.168.1.1
-  ipprotocol: tcp
+  ip_address: 192.168.1.1
+  ip_protocol: tcp

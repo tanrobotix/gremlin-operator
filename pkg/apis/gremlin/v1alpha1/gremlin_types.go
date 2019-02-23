@@ -14,6 +14,50 @@ type GremlinSpec struct {
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book.kubebuilder.io/beyond_basics/generating_crd.html
 	TeamID string `json:"team_id"`
+	// +kubebuilder:validation:Enum=attack-container,attack
+	Type string `json:"type"`
+	// +kubebuilder:validation:Enum=cpu,disk,dns,io,latency,memory,packet_loss,process_killer,shutdown
+	Gremlin string `json:"gremlin"`
+	Length  uint   `json:"length,omitempty"`
+
+	// CPU attack
+	Cores int `json:"cores"`
+	// Disk & IO attack
+	BlockSize uint   `json:"block_size,omitempty"`
+	Dir       string `json:"dir,omitempty"`
+	Percent   uint   `json:"percent,omitempty"`
+	Workers   uint   `json:"workers,omitempty"`
+	// +kubebuilder:validation:Enum=r,w,rw
+	Mode string `json:"mode,omitempty"`
+
+	// DNS, Latency  and packet_loss attack
+	Device     string `json:"device,omitempty"`
+	IPAddress  string `json:"ip_address,omitempty"`
+	IPProtocol string `json:"ip_protocol,omitempty"`
+	Ms         string `json:"ms,omitempty"`
+	EgressPort string `json:"egress_port,omitempty"`
+	SrcPort    string `json:"src_port,omitempty"`
+	Hostname   string `json:"hostname,omitempty"`
+
+	// Memory attack
+	GigaBytes uint `json:"gigabytes,omitempty"`
+	MegaBytes uint `json:"megabytes,omitempty"`
+
+	// Process Killer
+	Interval     uint   `json:"interval,omitempty"`
+	Process      string `json:"process,omitempty"`
+	Signal       int    `json:"signal,omitempty"`
+	Group        string `json:"group,omitempty"`
+	User         string `json:"user,omitempty"`
+	Newest       bool   `json:"newest,omitempty"`
+	Oldest       bool   `json:"oldest,omitempty"`
+	Exact        bool   `json:"exact,omitempty"`
+	KillChildren bool   `json:"kill_children,omitempty"`
+	Full         bool   `json:"full,omitempty"`
+
+	// Shutdown attack
+	Delay  uint `json:"delay,omitempty"`
+	Reboot bool `json:"reboot,omitempty"`
 }
 
 // GremlinStatus defines the observed state of Gremlin
