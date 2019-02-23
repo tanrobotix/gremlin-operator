@@ -169,7 +169,7 @@ func newJobForAttack(cr *gremlinv1alpha1.Gremlin, container string, containerID 
 						{
 							Name:  cr.Name + container + "-job-pod",
 							Image: "gremlin/gremlin",
-							Args:  []string{"attack-container", containerID, "cpu"},
+							Args:  buildArgs(cr, containerID),
 							SecurityContext: &corev1.SecurityContext{
 								Capabilities: &corev1.Capabilities{
 									Add: []corev1.Capability{"NET_ADMIN", "SYS_BOOT", "SYS_TIME", "KILL"},

@@ -23,10 +23,11 @@ type GremlinSpec struct {
 	// CPU attack
 	Cores int `json:"cores"`
 	// Disk & IO attack
-	BlockSize uint   `json:"block_size,omitempty"`
-	Dir       string `json:"dir,omitempty"`
-	Percent   uint   `json:"percent,omitempty"`
-	Workers   uint   `json:"workers,omitempty"`
+	BlockSize  uint   `json:"block_size,omitempty"`
+	BlockCount uint   `json:"block_count,omitempty"`
+	Dir        string `json:"dir,omitempty"`
+	Percent    uint   `json:"percent,omitempty"`
+	Workers    uint   `json:"workers,omitempty"`
 	// +kubebuilder:validation:Enum=r,w,rw
 	Mode string `json:"mode,omitempty"`
 
@@ -38,6 +39,7 @@ type GremlinSpec struct {
 	EgressPort string `json:"egress_port,omitempty"`
 	SrcPort    string `json:"src_port,omitempty"`
 	Hostname   string `json:"hostname,omitempty"`
+	Corrupt    bool   `json:"corrupt,omitempty"`
 
 	// Memory attack
 	GigaBytes uint `json:"gigabytes,omitempty"`
