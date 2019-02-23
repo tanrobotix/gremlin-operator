@@ -1,7 +1,7 @@
 apiVersion: gremlin.kubedex.com/v1alpha1
 kind: Gremlin
 metadata:
-  name: example-gremlin
+  name: example-packet-loss-gremlin
 spec:
   team_id: ""
   type: attack-container
@@ -10,7 +10,7 @@ spec:
   corrupt: false
   device: etch0
   egress_port: 443
-  egress_port: 443
+  src_port: 443
   ipaddress: 192.168.1.1
   hostname: example.com
   ipprotocol: tcp

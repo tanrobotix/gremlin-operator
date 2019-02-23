@@ -1,12 +1,12 @@
 apiVersion: gremlin.kubedex.com/v1alpha1
 kind: Gremlin
 metadata:
-  name: example-gremlin
+  name: example-memory-gremlin
 spec:
   team_id: ""
   type: attack-container
   gremlin: memory
   length: 60
-  gigabytes: 1GB
-  megabytes: 2MB
+  gigabytes: 1
+  megabytes: 2
   percent: 10

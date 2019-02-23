@@ -1,10 +1,10 @@
 apiVersion: gremlin.kubedex.com/v1alpha1
 kind: Gremlin
 metadata:
-  name: example-gremlin
+  name: example-gremlin-shutdown
 spec:
   team_id: ""
   type: attack-container
-  gremlin: io
+  gremlin: shutdown
   delay: 60
   reboot: true
