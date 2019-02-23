@@ -1,0 +1,14 @@
+apiVersion: gremlin.kubedex.com/v1alpha1
+kind: Gremlin
+metadata:
+  name: example-gremlin
+spec:
+  team_id: ""
+  type: attack-container
+  gremlin: io
+  length: 60
+  workers: 1
+  dir: /tmp
+  mode: rw
+  block_size: 1
+  block_count: 1

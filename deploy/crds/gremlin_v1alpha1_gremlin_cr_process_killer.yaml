@@ -1,0 +1,18 @@
+apiVersion: gremlin.kubedex.com/v1alpha1
+kind: Gremlin
+metadata:
+  name: example-gremlin
+spec:
+  team_id: ''
+  type: attack-container
+  gremlin: process_killer
+  interval: 60
+  process: '^abc'
+  signal: -9
+  group: adm
+  group: user
+  newest: true
+  newest: false
+  exact: true
+  kill_children: true
+  full: false

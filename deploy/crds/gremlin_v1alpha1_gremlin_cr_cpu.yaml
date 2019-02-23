@@ -4,3 +4,7 @@ metadata:
   name: example-gremlin
 spec:
   team_id: ""
+  type: attack-container
+  gremlin: cpu
+  length: 60
+  cores: 1

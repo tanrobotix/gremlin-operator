@@ -1,0 +1,12 @@
+apiVersion: gremlin.kubedex.com/v1alpha1
+kind: Gremlin
+metadata:
+  name: example-gremlin
+spec:
+  team_id: ""
+  type: attack-container
+  gremlin: dns
+  length: 60
+  device: etch0
+  ipaddress: 192.168.1.1
+  ipprotocol: tcp
