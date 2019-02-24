@@ -49,6 +49,9 @@ $ sed -i 's|REPLACE_IMAGE|kubedex/gremlin-operator|g' deploy/operator.yaml
 # On OSX use:
 $ sed -i "" 's|REPLACE_IMAGE|kubedex/gremlin-operator|g' deploy/operator.yaml
 
+# create gremlin secrets
+$ kubectl create secret generic gremlin-team-cert --from-file=./gremlin.cert --from-file=./gremlin.key
+
 # Setup Service Account
 $ kubectl create -f deploy/service_account.yaml
 # Setup RBAC

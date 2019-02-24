@@ -141,7 +141,7 @@ func buildArgs(cr *gremlinv1alpha1.Gremlin, containerID string) []string {
 		}
 	}
 
-	return []string{}
+	return args
 }
 
 func getArg(m map[string]interface{}) []string {
@@ -151,20 +151,20 @@ func getArg(m map[string]interface{}) []string {
 		case uint:
 			cst := v.(uint)
 			if cst > 0 {
-				subArg = append([]string{k, fmt.Sprint(cst)})
+				subArg = append(subArg, k, fmt.Sprint(cst))
 			}
 		case int:
 			cst := v.(int)
 			if cst > 0 {
-				subArg = append([]string{k, fmt.Sprint(cst)})
+				subArg = append(subArg, k, fmt.Sprint(cst))
 			}
 		case string:
 			cst := v.(string)
-			if cst != "" {
-				subArg = append([]string{k, cst})
+			if len(cst) > 0 {
+				subArg = append(subArg, k, cst)
 			}
 		case bool:
-			subArg = append([]string{k, fmt.Sprint(v)})
+			subArg = append(subArg, k, fmt.Sprint(v))
 		}
 	}
 	return subArg
