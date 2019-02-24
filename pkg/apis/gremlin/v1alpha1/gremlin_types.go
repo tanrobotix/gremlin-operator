@@ -66,7 +66,7 @@ type GremlinSpec struct {
 	Config ConfigOverride `json:"config_override,omitempty"`
 
 	ContainerFilter string            `json:"container_filter,omitempty"`
-	Labels          map[string]string `json:"labels,omitempty"`
+	Labels          map[string]string `json:"labels"`
 
 	RestartOnFailure bool `json:"restart_on_filaure,omitempty"`
 }
