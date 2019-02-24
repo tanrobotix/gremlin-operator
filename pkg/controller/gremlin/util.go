@@ -6,7 +6,7 @@ import (
 
 	gremlinv1alpha1 "github.com/Kubedex/gremlin-operator/pkg/apis/gremlin/v1alpha1"
 	batchv1 "k8s.io/api/batch/v1"
-	batchv2alpha1 "k8s.io/api/batch/v2alpha1"
+	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -218,11 +218,11 @@ func buildEnv(cr *gremlinv1alpha1.Gremlin) []v1.EnvVar {
 	return env
 }
 
-func getCronJobSpec(cr *gremlinv1alpha1.Gremlin, container string, containerID string, namespace string, node string) batchv2alpha1.CronJobSpec {
-	return batchv2alpha1.CronJobSpec{
+func getCronJobSpec(cr *gremlinv1alpha1.Gremlin, container string, containerID string, namespace string, node string) batchv1beta1.CronJobSpec {
+	return batchv1beta1.CronJobSpec{
 		Schedule:          cr.Spec.Schedule,
-		ConcurrencyPolicy: batchv2alpha1.ForbidConcurrent,
-		JobTemplate: batchv2alpha1.JobTemplateSpec{
+		ConcurrencyPolicy: batchv1beta1.ForbidConcurrent,
+		JobTemplate: batchv1beta1.JobTemplateSpec{
 			Spec: getBatchJobSpec(cr, container, containerID, namespace, node),
 		},
 	}

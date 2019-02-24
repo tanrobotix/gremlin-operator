@@ -10,7 +10,7 @@ import (
 	gremlinv1alpha1 "github.com/Kubedex/gremlin-operator/pkg/apis/gremlin/v1alpha1"
 
 	batchv1 "k8s.io/api/batch/v1"
-	batchv2alpha1 "k8s.io/api/batch/v2alpha1"
+	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -194,14 +194,14 @@ func createGremlinJob(cr *gremlinv1alpha1.Gremlin, container string, containerID
 
 // fuction createGremlinCronJob returns a gremlin/gremlin job with the same name/namespace and node as the pod
 // this will create the job with cron schedule
-func createGremlinCronJob(cr *gremlinv1alpha1.Gremlin, container string, containerID string, namespace string, node string) *batchv2alpha1.CronJob {
+func createGremlinCronJob(cr *gremlinv1alpha1.Gremlin, container string, containerID string, namespace string, node string) *batchv1beta1.CronJob {
 
 	labels := map[string]string{
 		"app": cr.Name,
 	}
 
 	// if Schedule is present then create a cronjob
-	return &batchv2alpha1.CronJob{
+	return &batchv1beta1.CronJob{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cr.Name + container + "-job",
 			Namespace: namespace,
