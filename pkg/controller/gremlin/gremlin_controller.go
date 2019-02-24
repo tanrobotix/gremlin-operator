@@ -10,6 +10,7 @@ import (
 	gremlinv1alpha1 "github.com/Kubedex/gremlin-operator/pkg/apis/gremlin/v1alpha1"
 
 	batchv1 "k8s.io/api/batch/v1"
+	batchv2alpha1 "k8s.io/api/batch/v2alpha1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -133,17 +134,35 @@ func (r *ReconcileGremlin) Reconcile(request reconcile.Request) (reconcile.Resul
 
 			// Replace docker:// from container id
 			containerID := strings.Replace(containerStatus.ContainerID, "docker://", "", 1)
-			// Create a k8s job to attack pod container
-			job := newJobForAttack(instance, containerStatus.Name, containerID,
-				pod.Namespace, pod.Spec.NodeName, instance.Spec.TeamID)
 
-			reqLogger.Info("Sheduling attack", "Job.Name", job.Name, "Job.Container", containerStatus.Name, "ContainerID", containerID)
+			// Create a k8s job or cron job if schedule is present
+			if len(instance.Spec.Schedule) > 0 {
+				job := createGremlinCronJob(instance, containerStatus.Name, containerID,
+					pod.Namespace, pod.Spec.NodeName)
 
+				reqLogger.Info("Sheduling attack CronJob", "Job.Name", job.Name, "Job.Container", containerStatus.Name, "ContainerID", containerID)
+				// Set Gremlin instance as the owner and controller
+				if err := controllerutil.SetControllerReference(instance, job, r.scheme); err != nil {
+					return reconcile.Result{}, err
+				}
+
+				reqLogger.Info("Creating a new CronJob", "Job.Namespace", job.Namespace, "Job.Name", job.Name, "Schedule", instance.Spec.Schedule)
+				err = r.client.Create(context.TODO(), job)
+				if err != nil {
+					return reconcile.Result{}, err
+				}
+				// cronjob schedule is success
+				return reconcile.Result{}, nil
+			}
+
+			job := createGremlinJob(instance, containerStatus.Name, containerID,
+				pod.Namespace, pod.Spec.NodeName)
+
+			reqLogger.Info("Sheduling attack Job", "Job.Name", job.Name, "Job.Container", containerStatus.Name, "ContainerID", containerID)
 			// Set Gremlin instance as the owner and controller
 			if err := controllerutil.SetControllerReference(instance, job, r.scheme); err != nil {
 				return reconcile.Result{}, err
 			}
-
 			reqLogger.Info("Creating a new Job", "Job.Namespace", job.Namespace, "Job.Name", job.Name)
 			err = r.client.Create(context.TODO(), job)
 			if err != nil {
@@ -155,80 +174,40 @@ func (r *ReconcileGremlin) Reconcile(request reconcile.Request) (reconcile.Resul
 	return reconcile.Result{}, nil
 }
 
-// newJobForAttack returns a gremlin/gremlin job with the same name/namespace and node as the pos
-func newJobForAttack(cr *gremlinv1alpha1.Gremlin, container string, containerID string, namespace string, node string, teamID string) *batchv1.Job {
+// createGremlinJob returns a gremlin/gremlin job with the same name/namespace and node as the pod
+func createGremlinJob(cr *gremlinv1alpha1.Gremlin, container string, containerID string, namespace string, node string) *batchv1.Job {
+
 	labels := map[string]string{
 		"app": cr.Name,
 	}
+
+	// else create a job
 	return &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cr.Name + container + "-job",
 			Namespace: namespace,
 			Labels:    labels,
 		},
-		Spec: batchv1.JobSpec{
-			Template: corev1.PodTemplateSpec{
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{
-						{
-							Name:  cr.Name + container + "-job-container",
-							Image: "gremlin/gremlin",
-							Args:  buildArgs(cr, containerID),
-							SecurityContext: &corev1.SecurityContext{
-								Capabilities: &corev1.Capabilities{
-									Add: []corev1.Capability{"NET_ADMIN", "SYS_BOOT", "SYS_TIME", "KILL"},
-								},
-							},
-							Env: buildEnv(cr),
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      "docker-sock",
-									MountPath: "/var/run/docker.sock",
-								},
-								{
-									Name:      "gremlin-state",
-									MountPath: "/var/lib/gremlin",
-								},
-								{
-									Name:      "gremlin-logs",
-									MountPath: "/var/log/gremlin",
-								},
-							},
-						},
-					},
-					RestartPolicy: corev1.RestartPolicyNever,
-					// set the exact node we want to run this attack
-					NodeName:    node,
-					HostNetwork: true,
-					HostPID:     true,
-					Volumes: []corev1.Volume{
-						{
-							Name: "docker-sock",
-							VolumeSource: corev1.VolumeSource{
-								HostPath: &corev1.HostPathVolumeSource{
-									Path: "/var/run/docker.sock",
-								},
-							},
-						},
-						{
-							Name: "gremlin-state",
-							VolumeSource: corev1.VolumeSource{
-								HostPath: &corev1.HostPathVolumeSource{
-									Path: "/var/lib/gremlin",
-								},
-							},
-						},
-						{
-							Name: "gremlin-logs",
-							VolumeSource: corev1.VolumeSource{
-								HostPath: &corev1.HostPathVolumeSource{
-									Path: "/var/log/gremlin",
-								},
-							},
-						},
-					},
-				},
-			},
+		Spec: getBatchJobSpec(cr, container, containerID, namespace, node),
+	}
+}
+
+// fuction createGremlinCronJob returns a gremlin/gremlin job with the same name/namespace and node as the pod
+// this will create the job with cron schedule
+func createGremlinCronJob(cr *gremlinv1alpha1.Gremlin, container string, containerID string, namespace string, node string) *batchv2alpha1.CronJob {
+
+	labels := map[string]string{
+		"app": cr.Name,
+	}
+
+	// if Schedule is present then create a cronjob
+	return &batchv2alpha1.CronJob{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      cr.Name + container + "-job",
+			Namespace: namespace,
+			Labels:    labels,
 		},
+
+		Spec: getCronJobSpec(cr, container, containerID, namespace, node),
 	}
 }

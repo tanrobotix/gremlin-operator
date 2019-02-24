@@ -17,6 +17,8 @@ spec:
   labels:
     app: nginx
   container_filter: "n([a-z])inx"
+  restart_on_filaure: false
+  schedule: "*/1 * * * *"
   config_override:
     team_id: ""
     team_private_key: ""

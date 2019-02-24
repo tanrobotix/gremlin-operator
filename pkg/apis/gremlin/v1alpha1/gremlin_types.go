@@ -57,6 +57,8 @@ type GremlinSpec struct {
 	KillChildren bool   `json:"kill_children,omitempty"`
 	Full         bool   `json:"full,omitempty"`
 
+	// Schedule
+	Schedule string `json:"schedule,omitempty"`
 	// Shutdown attack
 	Delay  uint `json:"delay,omitempty"`
 	Reboot bool `json:"reboot,omitempty"`
@@ -65,6 +67,8 @@ type GremlinSpec struct {
 
 	ContainerFilter string            `json:"container_filter,omitempty"`
 	Labels          map[string]string `json:"labels,omitempty"`
+
+	RestartOnFailure bool `json:"restart_on_filaure,omitempty"`
 }
 
 // ConfigOverride defines the parameters acceptable for override

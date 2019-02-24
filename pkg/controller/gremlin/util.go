@@ -5,7 +5,9 @@ import (
 	"os"
 
 	gremlinv1alpha1 "github.com/Kubedex/gremlin-operator/pkg/apis/gremlin/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
+	batchv1 "k8s.io/api/batch/v1"
+	batchv2alpha1 "k8s.io/api/batch/v2alpha1"
+	v1 "k8s.io/api/core/v1"
 )
 
 const (
@@ -181,34 +183,34 @@ func getEnv(env string, def string, override string) string {
 	return v
 }
 
-func buildEnv(cr *gremlinv1alpha1.Gremlin) []corev1.EnvVar {
+func buildEnv(cr *gremlinv1alpha1.Gremlin) []v1.EnvVar {
 	optional := false
 	// TODO: fill the overrides with spec configuration
-	env := []corev1.EnvVar{
+	env := []v1.EnvVar{
 		{
 			Name:  "GREMLIN_TEAM_ID",
 			Value: getEnv(GremlinTeamID, "", cr.Spec.TeamID),
 		},
 		{
 			Name: "GREMLIN_TEAM_CERTIFICATE_OR_FILE",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: getEnv(GremlinTeamCertificate, "gremlin-cert", ""),
+			ValueFrom: &v1.EnvVarSource{
+				SecretKeyRef: &v1.SecretKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: getEnv(GremlinTeamCertificate, "gremlin-cert", cr.Spec.Config.TeamCertificate),
 					},
-					Key:      getEnv(GremlinTeamCertificateSecretKey, "gremlin.cert", ""),
+					Key:      getEnv(GremlinTeamCertificateSecretKey, "gremlin.cert", cr.Spec.Config.TeamCertificateSecretKey),
 					Optional: &optional,
 				},
 			},
 		},
 		{
 			Name: "GREMLIN_TEAM_PRIVATE_KEY_OR_FILE",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: getEnv(GremlinTeamCertificate, "gremlin-cert", ""),
+			ValueFrom: &v1.EnvVarSource{
+				SecretKeyRef: &v1.SecretKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: getEnv(GremlinTeamCertificate, "gremlin-cert", cr.Spec.Config.TeamCertificate),
 					},
-					Key:      getEnv(GremlinTeamKeySecretKey, "gremlin.key", ""),
+					Key:      getEnv(GremlinTeamKeySecretKey, "gremlin.key", cr.Spec.Config.TeamKeySecretKey),
 					Optional: &optional,
 				},
 			},
@@ -216,4 +218,87 @@ func buildEnv(cr *gremlinv1alpha1.Gremlin) []corev1.EnvVar {
 	}
 
 	return env
+}
+
+func getCronJobSpec(cr *gremlinv1alpha1.Gremlin, container string, containerID string, namespace string, node string) batchv2alpha1.CronJobSpec {
+	return batchv2alpha1.CronJobSpec{
+		Schedule:          cr.Spec.Schedule,
+		ConcurrencyPolicy: batchv2alpha1.ForbidConcurrent,
+		JobTemplate: batchv2alpha1.JobTemplateSpec{
+			Spec: getBatchJobSpec(cr, container, containerID, namespace, node),
+		},
+	}
+}
+
+func getBatchJobSpec(cr *gremlinv1alpha1.Gremlin, container string, containerID string, namespace string, node string) batchv1.JobSpec {
+	// set restart policy
+	restart := v1.RestartPolicyNever
+	if cr.Spec.RestartOnFailure {
+		restart = v1.RestartPolicyOnFailure
+	}
+
+	return batchv1.JobSpec{
+		Template: v1.PodTemplateSpec{
+			Spec: v1.PodSpec{
+				Containers: []v1.Container{
+					{
+						Name:  cr.Name + container + "-job-container",
+						Image: "gremlin/gremlin",
+						Args:  buildArgs(cr, containerID),
+						SecurityContext: &v1.SecurityContext{
+							Capabilities: &v1.Capabilities{
+								Add: []v1.Capability{"NET_ADMIN", "SYS_BOOT", "SYS_TIME", "KILL"},
+							},
+						},
+						Env: buildEnv(cr),
+						VolumeMounts: []v1.VolumeMount{
+							{
+								Name:      "docker-sock",
+								MountPath: "/var/run/docker.sock",
+							},
+							{
+								Name:      "gremlin-state",
+								MountPath: "/var/lib/gremlin",
+							},
+							{
+								Name:      "gremlin-logs",
+								MountPath: "/var/log/gremlin",
+							},
+						},
+					},
+				},
+				RestartPolicy: restart,
+				// set the exact node we want to run this attack
+				NodeName:    node,
+				HostNetwork: true,
+				HostPID:     true,
+				Volumes: []v1.Volume{
+					{
+						Name: "docker-sock",
+						VolumeSource: v1.VolumeSource{
+							HostPath: &v1.HostPathVolumeSource{
+								Path: "/var/run/docker.sock",
+							},
+						},
+					},
+					{
+						Name: "gremlin-state",
+						VolumeSource: v1.VolumeSource{
+							HostPath: &v1.HostPathVolumeSource{
+								Path: "/var/lib/gremlin",
+							},
+						},
+					},
+					{
+						Name: "gremlin-logs",
+						VolumeSource: v1.VolumeSource{
+							HostPath: &v1.HostPathVolumeSource{
+								Path: "/var/log/gremlin",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
 }
