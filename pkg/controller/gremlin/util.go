@@ -2,8 +2,57 @@ package gremlin
 
 import (
 	"fmt"
+	"os"
 
 	gremlinv1alpha1 "github.com/Kubedex/gremlin-operator/pkg/apis/gremlin/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+)
+
+const (
+	// GremlinTeamID is the Team ID (required for authentication)
+	GremlinTeamID = "GREMLIN_TEAM_ID"
+
+	// GremlinIdentifier custom name to assign to this client
+	// (default is the host’s IP address)
+	GremlinIdentifier = "GREMLIN_IDENTIFIER"
+
+	// GremlinClientTags Comma-separated list of custom tags to
+	// assign to this client
+	// (e.g. GREMLIN_CLIENT_TAGS="zone=us-east1,role=mysql,foo=bar")
+	GremlinClientTags = "GREMLIN_CLIENT_TAGS"
+
+	// GremlinConfigService is service or group tag
+	GremlinConfigService = "GREMLIN_CONFIG_SERVICE"
+
+	// GremlinConfigRegion is region or datacenter
+	GremlinConfigRegion = "GREMLIN_CONFIG_REGION"
+
+	// GremlinConfigZone is the Availability Zone
+	GremlinConfigZone = "GREMLIN_CONFIG_ZONE"
+
+	// GremlinConfigPublicIP is the public IP address
+	GremlinConfigPublicIP = "GREMLIN_CONFIG_PUBLIC_IP"
+
+	// GremlinConfigPublicHostname is the public hostname
+	GremlinConfigPublicHostname = "GREMLIN_CONFIG_PUBLIC_HOSTNAME"
+
+	// GremlinConfigLocalIP is the internal IP address
+	GremlinConfigLocalIP = "GREMLIN_CONFIG_LOCAL_IP"
+
+	// GremlinConfigLocalHostname is the internal hostname
+	GremlinConfigLocalHostname = "GREMLIN_CONFIG_LOCAL_HOSTNAME"
+
+	// GremlinTeamCertificate is kubernetes secret name
+	// default gremlin-cert
+	GremlinTeamCertificate = "GREMLIN_TEAM_CERTIFICATE"
+
+	// GremlinTeamCertificateSecretKey is the key of the certificate secret to select from
+	// default gremlin.cert
+	GremlinTeamCertificateSecretKey = "GREMLIN_TEAM_CERTIFICATE_SECRET_KEY"
+
+	// GremlinTeamKeySecretKey is the key of the key secret to select from
+	// default gremlin.key
+	GremlinTeamKeySecretKey = "GREMLIN_TEAM_KEY_SECRET_KEY"
 )
 
 func buildArgs(cr *gremlinv1alpha1.Gremlin, containerID string) []string {
@@ -117,4 +166,54 @@ func getArg(m map[string]interface{}) []string {
 		}
 	}
 	return subArg
+}
+
+func getEnv(env string, def string, override string) string {
+	// return override regardless
+	if len(override) > 0 {
+		return override
+	}
+	// lookup environemnt and if value not found return default else return value
+	v, found := os.LookupEnv(env)
+	if !found {
+		return def
+	}
+	return v
+}
+
+func buildEnv(cr *gremlinv1alpha1.Gremlin) []corev1.EnvVar {
+	optional := false
+	// TODO: fill the overrides with spec configuration
+	env := []corev1.EnvVar{
+		{
+			Name:  "GREMLIN_TEAM_ID",
+			Value: getEnv(GremlinTeamID, "", cr.Spec.TeamID),
+		},
+		{
+			Name: "GREMLIN_TEAM_CERTIFICATE_OR_FILE",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: getEnv(GremlinTeamCertificate, "gremlin-cert", ""),
+					},
+					Key:      getEnv(GremlinTeamCertificateSecretKey, "gremlin.cert", ""),
+					Optional: &optional,
+				},
+			},
+		},
+		{
+			Name: "GREMLIN_TEAM_PRIVATE_KEY_OR_FILE",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: getEnv(GremlinTeamCertificate, "gremlin-cert", ""),
+					},
+					Key:      getEnv(GremlinTeamKeySecretKey, "gremlin.key", ""),
+					Optional: &optional,
+				},
+			},
+		},
+	}
+
+	return env
 }

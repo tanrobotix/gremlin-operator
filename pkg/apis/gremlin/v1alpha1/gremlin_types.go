@@ -60,6 +60,26 @@ type GremlinSpec struct {
 	// Shutdown attack
 	Delay  uint `json:"delay,omitempty"`
 	Reboot bool `json:"reboot,omitempty"`
+
+	Config ConfigOverride `json:"config_override,omitempty"`
+}
+
+// ConfigOverride defines the parameters acceptable for override
+// gremlin configuration
+type ConfigOverride struct {
+	TeamID                    string `json:"team_id,omitempty"`
+	TeamCertificate           string `json:"team_certificate,omitempty"`
+	TeamCertificateSecretKey  string `json:"team_certificate_secret_key,omitempty"`
+	TeamKeySecretKey          string `json:"team_key_secret_key,omitempty"`
+	TeamSecret                string `json:"team_secret,omitempty"`
+	Identifier                string `json:"identifier,omitempty"`
+	ClientTags                string `json:"client_tags,omitempty"`
+	ConfigService             string `json:"config_service,omitempty"`
+	ConfigRegion              string `json:"config_region,omitempty"`
+	ConfigPublicIP            string `json:"config_public_ip,omitempty"`
+	ConfigPublicHostname      string `json:"config_public_hostname,omitempty"`
+	ConfigLocalIP             string `json:"config_local_ip,omitempty"`
+	ConfigLocalHostnamestring string `json:"config_local_hostname,omitempty"`
 }
 
 // GremlinStatus defines the observed state of Gremlin

@@ -3,8 +3,20 @@ kind: Gremlin
 metadata:
   name: example-cpu-gremlin
 spec:
-  team_id: ""
   type: attack-container
   gremlin: cpu
   length: 60
   cores: 1
+  config_override:
+    team_id: ""
+    team_private_key: ""
+    team_certificate: ""
+    team_secret: ""
+    identifier: ""
+    client_tags: ""
+    config_service: ""
+    config_region: ""
+    config_public_ip: ""
+    config_public_hostname: ""
+    config_local_ip: ""
+    config_local_hostname: ""

@@ -155,7 +155,6 @@ func newJobForAttack(cr *gremlinv1alpha1.Gremlin, container string, containerID 
 	labels := map[string]string{
 		"app": cr.Name,
 	}
-	volumeSecretDefaultMode := int32(420)
 	return &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cr.Name + container + "-job",
@@ -167,7 +166,7 @@ func newJobForAttack(cr *gremlinv1alpha1.Gremlin, container string, containerID 
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:  cr.Name + container + "-job-pod",
+							Name:  cr.Name + container + "-job-container",
 							Image: "gremlin/gremlin",
 							Args:  buildArgs(cr, containerID),
 							SecurityContext: &corev1.SecurityContext{
@@ -175,24 +174,7 @@ func newJobForAttack(cr *gremlinv1alpha1.Gremlin, container string, containerID 
 									Add: []corev1.Capability{"NET_ADMIN", "SYS_BOOT", "SYS_TIME", "KILL"},
 								},
 							},
-							Env: []corev1.EnvVar{
-								{
-									Name:  "GREMLIN_TEAM_ID",
-									Value: teamID,
-								},
-								{
-									Name:  "GREMLIN_TEAM_CERTIFICATE_OR_FILE",
-									Value: "file:///var/lib/gremlin/cert/gremlin.cert",
-								},
-								{
-									Name:  "GREMLIN_TEAM_PRIVATE_KEY_OR_FILE",
-									Value: "file:///var/lib/gremlin/cert/gremlin.key",
-								},
-								{
-									Name:  "GREMLIN_IDENTIFIER",
-									Value: cr.Name + container + "-job-pod",
-								},
-							},
+							Env: buildEnv(cr),
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "docker-sock",
@@ -205,11 +187,6 @@ func newJobForAttack(cr *gremlinv1alpha1.Gremlin, container string, containerID 
 								{
 									Name:      "gremlin-logs",
 									MountPath: "/var/log/gremlin",
-								},
-								{
-									Name:      "gremlin-cert",
-									MountPath: "/var/lib/gremlin/cert",
-									ReadOnly:  true,
 								},
 							},
 						},
@@ -232,7 +209,7 @@ func newJobForAttack(cr *gremlinv1alpha1.Gremlin, container string, containerID 
 							Name: "gremlin-state",
 							VolumeSource: corev1.VolumeSource{
 								HostPath: &corev1.HostPathVolumeSource{
-									Path: "/var/log/gremlin",
+									Path: "/var/lib/gremlin",
 								},
 							},
 						},
@@ -241,15 +218,6 @@ func newJobForAttack(cr *gremlinv1alpha1.Gremlin, container string, containerID 
 							VolumeSource: corev1.VolumeSource{
 								HostPath: &corev1.HostPathVolumeSource{
 									Path: "/var/log/gremlin",
-								},
-							},
-						},
-						{
-							Name: "gremlin-cert",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName:  "gremlin-team-cert",
-									DefaultMode: &volumeSecretDefaultMode,
 								},
 							},
 						},

@@ -16,3 +16,16 @@ spec:
   exact: true
   kill_children: true
   full: false
+  config_override:
+    team_id: ""
+    team_private_key: ""
+    team_certificate: ""
+    team_secret: ""
+    identifier: ""
+    client_tags: ""
+    config_service: ""
+    config_region: ""
+    config_public_ip: ""
+    config_public_hostname: ""
+    config_local_ip: ""
+    config_local_hostname: ""
