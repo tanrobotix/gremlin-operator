@@ -57,13 +57,12 @@ const (
 	GremlinTeamKeySecretKey = "GREMLIN_TEAM_KEY_SECRET_KEY"
 )
 
-func buildArgs(cr *gremlinv1alpha1.Gremlin, containerID string) []string {
+func buildArgs(cr *gremlinv1alpha1.Gremlin, containerID string) (args []string) {
 	spec := cr.Spec
-	args := []string{}
 
 	// build args for attack-container type
 	if cr.Spec.Type == "attack-container" {
-		args = append(args, "attack-container", containerID)
+		args = append(args, "attack-container", containerID, cr.Spec.Gremlin)
 
 		// length is common parameter except for shutdown Gremlin
 		if spec.Length > 0 && spec.Gremlin != "shutdown" {
@@ -140,8 +139,7 @@ func buildArgs(cr *gremlinv1alpha1.Gremlin, containerID string) []string {
 			})...)
 		}
 	}
-
-	return args
+	return
 }
 
 func getArg(m map[string]interface{}) []string {
