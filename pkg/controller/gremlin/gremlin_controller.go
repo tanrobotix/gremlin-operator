@@ -2,8 +2,10 @@ package gremlin
 
 import (
 	"context"
-	"fmt"
+	"regexp"
 	"strings"
+
+	"k8s.io/apimachinery/pkg/labels"
 
 	gremlinv1alpha1 "github.com/Kubedex/gremlin-operator/pkg/apis/gremlin/v1alpha1"
 
@@ -105,44 +107,47 @@ func (r *ReconcileGremlin) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	// Get all the pods with annotations
 	podList := &v1.PodList{}
-	// Return all pods in the request namespace with a label of `gremlin.gremlin.kubedex.com/attack=<value>`
-	opts := &client.ListOptions{}
-	opts.SetLabelSelector(fmt.Sprintf("gremlin.gremlin.kubedex.com/enabled=%s", "true"))
-	err = r.client.List(context.TODO(), opts, podList)
+	// Return all pods in the request namespace with provided labels
+	labelSelector := labels.SelectorFromSet(instance.Spec.Labels)
+	listOps := &client.ListOptions{Namespace: request.Namespace, LabelSelector: labelSelector}
+	err = r.client.List(context.TODO(), listOps, podList)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	for _, pod := range podList.Items {
-		// check the attack is for single container or multiple containers
-		attackVector := "all"
-		if av, ok := pod.Annotations["gremlin.gremlin.kubedex.com/container"]; ok {
-			attackVector = av
-			reqLogger.Info("Attack selected", "Pod", av)
+	var filter *regexp.Regexp
+	if len(instance.Spec.ContainerFilter) > 0 {
+		filter, err = regexp.Compile(instance.Spec.ContainerFilter)
+		if err != nil {
+			reqLogger.Error(err, "Regular expression provided for container filter invalid", "Filter", instance.Spec.ContainerFilter)
+			return reconcile.Result{}, err
 		}
-		reqLogger.Info("Attack vector selected", "Pod", attackVector)
+	}
+	for _, pod := range podList.Items {
+		for _, containerStatus := range pod.Status.ContainerStatuses {
+			// check if container_filter is defined if skip every container unmatches
+			// filter regular expression
+			if filter != nil && !filter.Match([]byte(containerStatus.Name)) {
+				continue
+			}
 
-		// if attack is for all the containers, schedule pods for attack
-		if attackVector == "all" {
-			for _, containerStatus := range pod.Status.ContainerStatuses {
-				// Replace docker:// from container id
-				containerID := strings.Replace(containerStatus.ContainerID, "docker://", "", 1)
-				// Create a k8s job to attack pod container
-				job := newJobForAttack(instance, containerStatus.Name, containerID,
-					pod.Namespace, pod.Spec.NodeName, instance.Spec.TeamID)
+			// Replace docker:// from container id
+			containerID := strings.Replace(containerStatus.ContainerID, "docker://", "", 1)
+			// Create a k8s job to attack pod container
+			job := newJobForAttack(instance, containerStatus.Name, containerID,
+				pod.Namespace, pod.Spec.NodeName, instance.Spec.TeamID)
 
-				reqLogger.Info("Sheduling attack", "Job.Name", job.Name, "Job.Container", containerStatus.Name, "ContainerID", containerID)
+			reqLogger.Info("Sheduling attack", "Job.Name", job.Name, "Job.Container", containerStatus.Name, "ContainerID", containerID)
 
-				// Set Gremlin instance as the owner and controller
-				if err := controllerutil.SetControllerReference(instance, job, r.scheme); err != nil {
-					return reconcile.Result{}, err
-				}
+			// Set Gremlin instance as the owner and controller
+			if err := controllerutil.SetControllerReference(instance, job, r.scheme); err != nil {
+				return reconcile.Result{}, err
+			}
 
-				reqLogger.Info("Creating a new Job", "Job.Namespace", job.Namespace, "Job.Name", job.Name)
-				err = r.client.Create(context.TODO(), job)
-				if err != nil {
-					return reconcile.Result{}, err
-				}
+			reqLogger.Info("Creating a new Job", "Job.Namespace", job.Namespace, "Job.Name", job.Name)
+			err = r.client.Create(context.TODO(), job)
+			if err != nil {
+				return reconcile.Result{}, err
 			}
 		}
 	}

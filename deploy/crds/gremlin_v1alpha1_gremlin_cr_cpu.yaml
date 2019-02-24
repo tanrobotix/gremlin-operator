@@ -7,6 +7,9 @@ spec:
   gremlin: cpu
   length: 60
   cores: 1
+  labels:
+    app: nginx
+  container_filter: "n([a-z])inx"
   config_override:
     team_id: ""
     team_private_key: ""

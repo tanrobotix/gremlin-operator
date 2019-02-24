@@ -62,6 +62,9 @@ type GremlinSpec struct {
 	Reboot bool `json:"reboot,omitempty"`
 
 	Config ConfigOverride `json:"config_override,omitempty"`
+
+	ContainerFilter string            `json:"container_filter,omitempty"`
+	Labels          map[string]string `json:"labels,omitempty"`
 }
 
 // ConfigOverride defines the parameters acceptable for override

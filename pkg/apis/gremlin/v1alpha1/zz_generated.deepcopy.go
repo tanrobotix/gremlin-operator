@@ -45,7 +45,7 @@ func (in *Gremlin) DeepCopyInto(out *Gremlin) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
 	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
-	out.Spec = in.Spec
+	in.Spec.DeepCopyInto(&out.Spec)
 	out.Status = in.Status
 	return
 }
@@ -105,6 +105,13 @@ func (in *GremlinList) DeepCopyObject() runtime.Object {
 func (in *GremlinSpec) DeepCopyInto(out *GremlinSpec) {
 	*out = *in
 	out.Config = in.Config
+	if in.Labels != nil {
+		in, out := &in.Labels, &out.Labels
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 

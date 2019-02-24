@@ -8,6 +8,9 @@ spec:
   gremlin: shutdown
   delay: 60
   reboot: true
+  labels:
+    app: nginx
+  container_filter: "n([a-z])inx"
   config_override:
     team_id: ""
     team_private_key: ""
