@@ -141,7 +141,9 @@ Under `spec` you can **optionally** add the following fields to override setting
 
 **Note:** To create an adhoc immediate attack leave the `schedule:` field empty.
 
-The `labels:` field is mandatory and determines which pod(s) to attack. The `container_filter:` is optional and provides a way to directly attack certain containers within the pod(s).
+The `labels:` field is mandatory and determines which pod(s) to attack. The `container_filter:` is optional and provides a way to directly attack certain containers within the pod(s). This supports [Golang regexes](https://regex-golang.appspot.com/assets/html/index.html).
+
+
 
 ### Supported Attacks
 
