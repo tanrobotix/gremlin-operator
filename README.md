@@ -96,26 +96,36 @@ kubectl create -f deploy/operator.yaml
 
 ### Create a GremlinService CRD
 
-You can find some example CRD's in `deploy/crds`. For example, to run the Shutdown Gremlin on nginx pods in the cluster once every 24 hours at midnight you can apply the following CRD.
+You can find some example CRD's in `deploy/crds`. For example, to chaos test nginx pods in the cluster by killing the pods once every 24 hours at midnight you can apply the following CRD.
 
 ```yaml
 apiVersion: gremlin.kubedex.com/v1alpha1
 kind: Gremlin
 metadata:
-  name: gremlin-shutdown-nginx
+  name: example-process-killer-gremlin
 spec:
+  team_id: ''
   type: attack-container
-  gremlin: shutdown
-  delay: 60
-  reboot: true
+  gremlin: process_killer
+  interval: 60
+  process: '^abc'
+  signal: -9
+  group: adm
+  user: user
+  newest: true
+  oldest: false
+  exact: true
+  kill_children: true
+  full: false
   labels:
     app: nginx
   container_filter: "n([a-z])inx"
-  restart_on_failure: false
+  restart_on_filaure: false
   schedule: "0 0 * * *"
 ```
 
 Save this as `gremlin_v1alpha1_gremlin_cr_shutdown_nginx.yaml` and then `kubectl apply -f gremlin_v1alpha1_gremlin_cr_shutdown_nginx.yaml`.
+
 
 **Note:** To create an adhoc immediate attack leave the `schedule:` field empty.
 
