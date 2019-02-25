@@ -6,7 +6,7 @@ Chaos test Kubernetes pods using https://www.gremlin.com
 ### create gremlin secrets
 
 ```sh
-kubectl create secret generic gremlin-team-cert --from-file=./gremlin.cert --from-file=./gremlin.key`
+kubectl create secret generic gremlin-team-cert --from-file=./gremlin.cert --from-file=./gremlin.key
 ```
 
 ### Setup Service Account
