@@ -1,6 +1,6 @@
 # gremlin-operator
 
-Chaos test Kubernetes pods using https://www.gremlin.com
+Chaos test Kubernetes pods using https://www.gremlin.com. Break things on purpose.
 
 This is an open-source Operator for scheduling attacks on pods within a Kubernetes cluster using CRD's.
 
