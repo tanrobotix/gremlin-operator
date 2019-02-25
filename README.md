@@ -12,7 +12,7 @@ When an attack starts this Operator automatically creates Gremlin pod(s) on the 
 
 # Installation
 
-### Create Gremlin secret
+### Create Gremlin Secret
 
 If you do not already have your certificates locally, you can download them by going the teams page in the Gremlin Web IUI and selecting the team for which you’d like to install the client. From there you can select ‘Download’ to download the current certificate, or ‘Create New’ if you have not yet created your client certificates.
 
@@ -41,7 +41,7 @@ kubectl create -f deploy/role_binding.yaml
 kubectl create -f deploy/crds/gremlin_v1alpha1_gremlin_crd.yaml
 ```
 
-### Deploy the gremlin-operator
+### Deploy the Gremlin Operator
 
 To configure the operator edit `deploy/operator.yaml` and modify `<your team id>`.
 
@@ -142,8 +142,6 @@ Under `spec` you can **optionally** add the following fields to override setting
 **Note:** To create an adhoc immediate attack leave the `schedule:` field empty.
 
 The `labels:` field is mandatory and determines which pod(s) to attack. The `container_filter:` is optional and provides a way to directly attack certain containers within the pod(s). This supports [Golang regexes](https://regex-golang.appspot.com/assets/html/index.html).
-
-
 
 ### Supported Attacks
 
