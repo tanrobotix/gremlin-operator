@@ -96,8 +96,6 @@ kubectl create -f deploy/operator.yaml
 
 ### Create a GremlinService CRD
 
-The default controller will watch for GremlinService objects and create a pod for each CRD.
-
 You can find some example CRD's in `deploy/crds`. For example, to run the Shutdown Gremlin on nginx pods in the cluster once every 24 hours at midnight you can apply the following CRD.
 
 ```yaml
