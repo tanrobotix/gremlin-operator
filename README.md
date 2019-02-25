@@ -167,3 +167,9 @@ See the [Gremlin docs](https://help.gremlin.com/attacks/) for more information a
 # Development setup
 
 See `docs/development.md`.
+
+# TODO
+
+- Specify percentage of targets to attack
+- Automated testing for this repository
+
