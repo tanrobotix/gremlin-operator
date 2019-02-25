@@ -2,7 +2,7 @@
 
 Chaos test Kubernetes pods using https://www.gremlin.com
 
-This is an open-source unofficial Operator for scheduling attacks on pods within a Kubernetes cluster using CRD's.
+This is an open-source Operator for scheduling attacks on pods within a Kubernetes cluster using CRD's.
 
 Attacks are scheduled using a Cron format field in a CRD. This creates a Kubernetes native cronjob that you can view using `kubectl get cronjobs`.
 
