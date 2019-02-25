@@ -55,7 +55,6 @@ kind: Gremlin
 metadata:
   name: gremlin-shutdown-nginx
 spec:
-  team_id: "<your team id>"
   type: attack-container
   gremlin: shutdown
   delay: 60
@@ -66,7 +65,7 @@ spec:
   restart_on_filaure: false
   schedule: "0 0 * * *"
   config_override:
-    team_id: ""
+    team_id: "<your team id>"
     team_private_key: ""
     team_certificate: ""
     team_secret: ""
