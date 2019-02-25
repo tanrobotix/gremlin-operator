@@ -43,6 +43,53 @@ kubectl create -f deploy/crds/gremlin_v1alpha1_gremlin_crd.yaml
 
 ### Deploy the gremlin-operator
 
+To configure the operator edit `deploy/operator.yaml` and modify `<your team id>`.
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gremlin-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gremlin-operator
+  template:
+    metadata:
+      labels:
+        name: gremlin-operator
+    spec:
+      serviceAccountName: gremlin-operator
+      containers:
+        - name: gremlin-operator
+          image: kubedex/gremlin-operator
+          command:
+          - gremlin-operator
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "gremlin-operator"
+            - name: GREMLIN_TEAM_ID
+              value: "<your team id>"
+            - name: "GREMLIN_TEAM_CERTIFICATE"
+              value: "gremlin-cert"
+            - name: "GREMLIN_TEAM_CERTIFICATE_SECRET_KEY"
+              value: "gremlin.cert"
+            - name: "GREMLIN_TEAM_KEY_SECRET_KEY"
+              value: "gremlin.key"
+```
+
+Then create the Operator.
+
 ```sh
 kubectl create -f deploy/operator.yaml
 ```
@@ -68,19 +115,6 @@ spec:
   container_filter: "n([a-z])inx"
   restart_on_filaure: false
   schedule: "0 0 * * *"
-  config_override:
-    team_id: "<your team id>"
-    team_private_key: ""
-    team_certificate: ""
-    team_secret: ""
-    identifier: ""
-    client_tags: ""
-    config_service: ""
-    config_region: ""
-    config_public_ip: ""
-    config_public_hostname: ""
-    config_local_ip: ""
-    config_local_hostname: ""
 ```
 
 Save this as `gremlin_v1alpha1_gremlin_cr_shutdown_nginx.yaml` and then `kubectl apply -f gremlin_v1alpha1_gremlin_cr_shutdown_nginx.yaml`.
