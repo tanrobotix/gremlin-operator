@@ -1,6 +1,79 @@
 # gremlin-operator
 Chaos test Kubernetes pods using https://www.gremlin.com
 
+# Installation
+
+### create gremlin secrets
+
+```sh
+kubectl create secret generic gremlin-team-cert --from-file=./gremlin.cert --from-file=./gremlin.key`
+```
+
+### Setup Service Account
+
+```sh
+kubectl create -f deploy/service_account.yaml
+```
+
+### Setup RBAC
+
+```sh
+kubectl create -f deploy/role.yaml
+kubectl create -f deploy/role_binding.yaml
+```
+
+### Setup the CRD
+
+```sh
+kubectl create -f deploy/crds/gremlin_v1alpha1_gremlin_crd.yaml
+```
+
+### Deploy the gremlin-operator
+
+```sh
+kubectl create -f deploy/operator.yaml
+```
+
+### Create a GremlinService CRD
+
+The default controller will watch for GremlinService objects and create a pod for each CRD.
+
+You can find some example CRD's in `deploy/crds`. For example, to run the Shutdown Gremlin on nginx pods in the cluster once every 24 hours at midnight you can apply the following CRD.
+
+```yaml
+apiVersion: gremlin.kubedex.com/v1alpha1
+kind: Gremlin
+metadata:
+  name: gremlin-shutdown-nginx
+spec:
+  team_id: "<your team id>"
+  type: attack-container
+  gremlin: shutdown
+  delay: 60
+  reboot: true
+  labels:
+    app: nginx
+  container_filter: "n([a-z])inx"
+  restart_on_filaure: false
+  schedule: "0 0 * * *"
+  config_override:
+    team_id: ""
+    team_private_key: ""
+    team_certificate: ""
+    team_secret: ""
+    identifier: ""
+    client_tags: ""
+    config_service: ""
+    config_region: ""
+    config_public_ip: ""
+    config_public_hostname: ""
+    config_local_ip: ""
+    config_local_hostname: ""
+```
+
+Save this as `gremlin_v1alpha1_gremlin_cr_shutdown_nginx.yaml` and then `kubectl apply -f gremlin_v1alpha1_gremlin_cr_shutdown_nginx.yaml`.
+
+
 # Development setup
 
 ## Prerequisites
