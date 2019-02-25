@@ -8,7 +8,7 @@ Attacks are scheduled using a Cron format field in CRD's. This creates a Kuberne
 
 When an attack starts this Operator automatically injects a Gremlin container into the pod for the lifecycle of the attack.
 
-*Note:* Attacks scheduled from the Gremlin Web UI are not used by this Operator. All configuration is via CRD. However, attack results will show up in the Gremlin Web UI.
+**Note:** Attacks scheduled from the Gremlin Web UI are not used by this Operator. All configuration is via CRD. However, attack results will show up in the Gremlin Web UI.
 
 # Installation
 
