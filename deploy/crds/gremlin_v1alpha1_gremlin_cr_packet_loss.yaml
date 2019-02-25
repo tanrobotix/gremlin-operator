@@ -1,0 +1,34 @@
+apiVersion: gremlin.kubedex.com/v1alpha1
+kind: Gremlin
+metadata:
+  name: example-packet-loss-gremlin
+spec:
+  team_id: ""
+  type: attack-container
+  gremlin: packet_loss
+  length: 60
+  corrupt: false
+  device: etch0
+  egress_port: 443
+  src_port: 443
+  ipaddress: 192.168.1.1
+  hostname: example.com
+  ipprotocol: tcp
+  labels:
+    app: nginx
+  container_filter: "n([a-z])inx"
+  restart_on_filaure: false
+  schedule: "*/1 * * * *"
+  config_override:
+    team_id: ""
+    team_private_key: ""
+    team_certificate: ""
+    team_secret: ""
+    identifier: ""
+    client_tags: ""
+    config_service: ""
+    config_region: ""
+    config_public_ip: ""
+    config_public_hostname: ""
+    config_local_ip: ""
+    config_local_hostname: ""

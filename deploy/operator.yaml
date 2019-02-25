@@ -31,3 +31,12 @@ spec:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
               value: "gremlin-operator"
+            # Gremlin configuration
+            - name: GREMLIN_TEAM_ID
+              value: ""
+            - name: "GREMLIN_TEAM_CERTIFICATE"
+              value: "gremlin-cert"
+            - name: "GREMLIN_TEAM_CERTIFICATE_SECRET_KEY"
+              value: "gremlin.cert"
+            - name: "GREMLIN_TEAM_KEY_SECRET_KEY"
+              value: "gremlin.key"

@@ -1,0 +1,32 @@
+apiVersion: gremlin.kubedex.com/v1alpha1
+kind: Gremlin
+metadata:
+  name: example-io-gremlin
+spec:
+  team_id: ""
+  type: attack-container
+  gremlin: io
+  length: 60
+  workers: 1
+  dir: /tmp
+  mode: rw
+  block_size: 1
+  block_count: 1
+  labels:
+    app: nginx
+  container_filter: "n([a-z])inx"
+  restart_on_filaure: false
+  schedule: "*/1 * * * *"
+  config_override:
+    team_id: ""
+    team_private_key: ""
+    team_certificate: ""
+    team_secret: ""
+    identifier: ""
+    client_tags: ""
+    config_service: ""
+    config_region: ""
+    config_public_ip: ""
+    config_public_hostname: ""
+    config_local_ip: ""
+    config_local_hostname: ""
