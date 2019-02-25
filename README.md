@@ -6,7 +6,7 @@ This is an open-source Operator for scheduling attacks on pods within a Kubernet
 
 Attacks are scheduled using a Cron format field in CRD's. This creates a Kubernetes native cronjob that you can view using `kubectl get cronjobs`.
 
-When an attack starts this Operator automatically injects a Gremlin container into the pod for the lifecycle of the attack.
+When an attack starts this Operator automatically creates Gremlin pod(s) on the same node(s) as the target pods to directly attack pods on the same node.
 
 **Note:** Attacks scheduled from the Gremlin Web UI are not used by this Operator. All configuration is via CRD. However, attack results will show up in the Gremlin Web UI.
 
@@ -111,13 +111,15 @@ spec:
   labels:
     app: nginx
   container_filter: "n([a-z])inx"
-  restart_on_filaure: false
+  restart_on_failure: false
   schedule: "0 0 * * *"
 ```
 
 Save this as `gremlin_v1alpha1_gremlin_cr_shutdown_nginx.yaml` and then `kubectl apply -f gremlin_v1alpha1_gremlin_cr_shutdown_nginx.yaml`.
 
 **Note:** To create an adhoc immediate attack leave the `schedule:` field empty.
+
+The `labels:` field is mandatory and determines which pod(s) to attack. The `container_filter:` is optional and provides a way to directly attack certain containers within the pod(s).
 
 
 # Development setup
