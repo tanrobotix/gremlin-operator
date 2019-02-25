@@ -121,12 +121,31 @@ spec:
 
 Save this as `gremlin_v1alpha1_gremlin_cr_shutdown_nginx.yaml` and then `kubectl apply -f gremlin_v1alpha1_gremlin_cr_shutdown_nginx.yaml`.
 
+Under `spec` you can **optionally** add the following fields to override settings per CRD.
+
+```yaml
+  config_override:
+    team_id: ""
+    team_private_key: ""
+    team_certificate: ""
+    team_secret: ""
+    identifier: ""
+    client_tags: ""
+    config_service: ""
+    config_region: ""
+    config_public_ip: ""
+    config_public_hostname: ""
+    config_local_ip: ""
+    config_local_hostname: ""
+```
 
 **Note:** To create an adhoc immediate attack leave the `schedule:` field empty.
 
 The `labels:` field is mandatory and determines which pod(s) to attack. The `container_filter:` is optional and provides a way to directly attack certain containers within the pod(s).
 
 ### Supported Attacks
+
+You can find commented examples for each attack under `deploy/crds`.
 
 | Attack         | Description                                                                                    | 
 |----------------|------------------------------------------------------------------------------------------------|
@@ -139,6 +158,11 @@ The `labels:` field is mandatory and determines which pod(s) to attack. The `con
 | DNS            | Blackhole DNS in the targeted pod(s)                                                           |
 | Latency        | Increase network latency in the targeted pod(s) by the specified number of ms                  |
 | Packet Loss    | Triggers packet loss in the targeted pod(s)                                                    |
+| Black Hole     | Drops all network traffic in targeted pod(s)                                                   |
+
+See the [Gremlin docs](https://help.gremlin.com/attacks/) for more information about the attacks.
+
+**Note:** The time travel attack won't work on Kubernetes.
 
 # Development setup
 
