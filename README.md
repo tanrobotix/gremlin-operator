@@ -1,4 +1,4 @@
-# gremlin-operator
+# Gremlin Operator
 
 Chaos test Kubernetes pods using https://www.gremlin.com. Break things on purpose.
 
