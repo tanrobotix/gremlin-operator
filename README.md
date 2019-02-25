@@ -121,7 +121,7 @@ spec:
 
 Save this as `gremlin_v1alpha1_gremlin_cr_shutdown_nginx.yaml` and then `kubectl apply -f gremlin_v1alpha1_gremlin_cr_shutdown_nginx.yaml`.
 
-Under `spec` you can **optionally** add the following fields to override settings per CRD.
+Under `spec` you can **optionally** add the following fields to override settings per CRD. You should not need to set these.
 
 ```yaml
   config_override:
