@@ -12,7 +12,11 @@ When an attack starts this Operator automatically injects a Gremlin container in
 
 # Installation
 
-### Create gremlin secrets
+### Create Gremlin secret
+
+If you do not already have your certificates locally, you can download them by going the teams page in the Gremlin Web IUI and selecting the team for which you’d like to install the client. From there you can select ‘Download’ to download the current certificate, or ‘Create New’ if you have not yet created your client certificates.
+
+When you download your certificate files, they will have a name like YOUR_TEAM_NAME-client.priv_key.pem and YOUR_TEAM_NAME-client.pub_cert.pem. Rename these files to gremlin.key and gremlin.cert respectively. Then create your secret as follows:
 
 ```sh
 kubectl create secret generic gremlin-team-cert --from-file=./gremlin.cert --from-file=./gremlin.key
