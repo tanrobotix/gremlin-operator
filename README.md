@@ -119,6 +119,8 @@ spec:
 
 Save this as `gremlin_v1alpha1_gremlin_cr_shutdown_nginx.yaml` and then `kubectl apply -f gremlin_v1alpha1_gremlin_cr_shutdown_nginx.yaml`.
 
+**Note:** To create an adhoc immediate attack leave the `schedule:` field empty.
+
 
 # Development setup
 
