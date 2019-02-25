@@ -102,13 +102,12 @@ You can find some example CRD's in `deploy/crds`. For example, to chaos test ngi
 apiVersion: gremlin.kubedex.com/v1alpha1
 kind: Gremlin
 metadata:
-  name: example-process-killer-gremlin
+  name: nginx-process-killer-gremlin
 spec:
-  team_id: ''
   type: attack-container
   gremlin: process_killer
   interval: 60
-  process: '^abc'
+  process: '^nginx'
   signal: -9
   group: adm
   user: user
@@ -120,7 +119,7 @@ spec:
   labels:
     app: nginx
   container_filter: "n([a-z])inx"
-  restart_on_filaure: false
+  restart_on_failure: false
   schedule: "0 0 * * *"
 ```
 
