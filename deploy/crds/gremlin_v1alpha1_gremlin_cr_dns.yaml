@@ -3,7 +3,6 @@ kind: Gremlin
 metadata:
   name: example-dns-gremlin
 spec:
-  team_id: ""
   type: attack-container
   gremlin: dns
   length: 60
@@ -13,7 +12,7 @@ spec:
   labels:
     app: nginx
   container_filter: "n([a-z])inx"
-  restart_on_filaure: false
+  restart_on_failure: false
   schedule: "*/1 * * * *"
   config_override:
     team_id: ""
