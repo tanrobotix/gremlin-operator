@@ -109,13 +109,9 @@ spec:
   interval: 60
   process: '^nginx'
   signal: -9
-  group: adm
-  user: user
   newest: true
-  oldest: false
   exact: true
   kill_children: true
-  full: false
   labels:
     app: nginx
   container_filter: "n([a-z])inx"
@@ -130,6 +126,19 @@ Save this as `gremlin_v1alpha1_gremlin_cr_shutdown_nginx.yaml` and then `kubectl
 
 The `labels:` field is mandatory and determines which pod(s) to attack. The `container_filter:` is optional and provides a way to directly attack certain containers within the pod(s).
 
+### Supported Attacks
+
+| Attack         | Description                                                                                    | 
+|----------------|------------------------------------------------------------------------------------------------|
+| Process Killer | Use this to kill pods                                                                          |
+| Shutdown       | This will shutdown entire nodes that the targets are running on (killing all pods on the node) |
+| CPU            | Increases CPU utilisation to 100% in the targeted pod(s) on the specified number of cores      |
+| Disk           | Fills up the disk inside the pod container(s) by the specified percentage                      |
+| I/O            | Saturates IO in the targeted pod(s)                                                            |
+| Memory         | Increases memory in targeted pod(s) by the specified amount in mb, gb or percentage            |
+| DNS            | Blackhole DNS in the targeted pod(s)                                                           |
+| Latency        | Increase network latency in the targeted pod(s) by the specified number of ms                  |
+| Packet Loss    | Triggers packet loss in the targeted pod(s)                                                    |
 
 # Development setup
 
