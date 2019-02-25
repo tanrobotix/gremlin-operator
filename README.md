@@ -12,7 +12,7 @@ When an attack starts this Operator automatically injects a Gremlin container in
 
 # Installation
 
-### create gremlin secrets
+### Create gremlin secrets
 
 ```sh
 kubectl create secret generic gremlin-team-cert --from-file=./gremlin.cert --from-file=./gremlin.key
