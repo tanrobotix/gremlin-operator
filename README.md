@@ -162,8 +162,6 @@ You can find commented examples for each attack under `deploy/crds`.
 
 See the [Gremlin docs](https://help.gremlin.com/attacks/) for more information about the attacks.
 
-**Note:** The time travel attack won't work on Kubernetes.
-
 # Development setup
 
 See `docs/development.md`.
