@@ -9,6 +9,8 @@ import (
 
 	gremlinv1alpha1 "github.com/Kubedex/gremlin-operator/pkg/apis/gremlin/v1alpha1"
 
+	gerr "errors"
+
 	batchv1 "k8s.io/api/batch/v1"
 	batchv1beta1 "k8s.io/api/batch/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -124,23 +126,61 @@ func (r *ReconcileGremlin) Reconcile(request reconcile.Request) (reconcile.Resul
 			return reconcile.Result{}, err
 		}
 	}
-	for _, pod := range podList.Items {
-		for _, containerStatus := range pod.Status.ContainerStatuses {
+
+	// calculate attack persentage
+	podCount := len(podList.Items)
+	impact := 0
+
+	if podCount == 0 {
+		reqLogger.Error(gerr.New("Zero matches for filter"), "No pods selected for impact", "Filter", instance.Spec.ContainerFilter)
+		return reconcile.Result{}, err
+	}
+
+	// calculate maximum number of pods will impact
+	if instance.Spec.ImpactPercentage > 0 {
+		c := uint(podCount) * instance.Spec.ImpactPercentage / 100
+		if c > 0 {
+			impact = int(c)
+		} else {
+			reqLogger.Error(gerr.New("Impact percentage is too low"), "Impact percentage is matched zero pods",
+				"Percentage", instance.Spec.ImpactPercentage, "Pod Count", podCount)
+			return reconcile.Result{}, err
+		}
+	} else {
+		if instance.Spec.ImpactCount > 0 {
+			impact = int(instance.Spec.ImpactCount)
+		}
+	}
+
+	for i, pod := range podList.Items {
+		// if current index is greater than impact
+		// break the loop
+		if (i + 1) > impact {
+			reqLogger.Info("Maximum impact pods reached", "Impact", impact, "Current", i)
+			break
+		}
+
+		for _, cstatus := range pod.Status.ContainerStatuses {
 			// check if container_filter is defined if skip every container unmatches
 			// filter regular expression
-			if filter != nil && !filter.Match([]byte(containerStatus.Name)) {
+			if filter != nil && !filter.Match([]byte(cstatus.Name)) {
 				continue
 			}
 
+			if !cstatus.Ready {
+				continue
+				reqLogger.Info("Container not ready", "Container", cstatus.Name, "ContainerID", cstatus.ContainerID)
+			}
+
 			// Replace docker:// from container id
-			containerID := strings.Replace(containerStatus.ContainerID, "docker://", "", 1)
+			containerID := strings.Replace(cstatus.ContainerID, "docker://", "", 1)
 
 			// Create a k8s job or cron job if schedule is present
 			if len(instance.Spec.Schedule) > 0 {
-				job := createGremlinCronJob(instance, containerStatus.Name, containerID,
+				job := createGremlinCronJob(instance, cstatus.Name, containerID,
 					pod.Namespace, pod.Spec.NodeName)
 
-				reqLogger.Info("Sheduling attack CronJob", "Job.Name", job.Name, "Job.Container", containerStatus.Name, "ContainerID", containerID)
+				reqLogger.Info("Sheduling attack CronJob", "Job", job.Name, "Container", cstatus.Name, "ContainerID", containerID)
 				// Set Gremlin instance as the owner and controller
 				if err := controllerutil.SetControllerReference(instance, job, r.scheme); err != nil {
 					return reconcile.Result{}, err
@@ -155,10 +195,10 @@ func (r *ReconcileGremlin) Reconcile(request reconcile.Request) (reconcile.Resul
 				return reconcile.Result{}, nil
 			}
 
-			job := createGremlinJob(instance, containerStatus.Name, containerID,
+			job := createGremlinJob(instance, cstatus.Name, containerID,
 				pod.Namespace, pod.Spec.NodeName)
 
-			reqLogger.Info("Sheduling attack Job", "Job.Name", job.Name, "Job.Container", containerStatus.Name, "ContainerID", containerID)
+			reqLogger.Info("Sheduling attack Job", "Job.Name", job.Name, "Job.Container", cstatus.Name, "ContainerID", containerID)
 			// Set Gremlin instance as the owner and controller
 			if err := controllerutil.SetControllerReference(instance, job, r.scheme); err != nil {
 				return reconcile.Result{}, err
@@ -176,17 +216,14 @@ func (r *ReconcileGremlin) Reconcile(request reconcile.Request) (reconcile.Resul
 
 // createGremlinJob returns a gremlin/gremlin job with the same name/namespace and node as the pod
 func createGremlinJob(cr *gremlinv1alpha1.Gremlin, container string, containerID string, namespace string, node string) *batchv1.Job {
-
 	labels := map[string]string{
 		"app": cr.Name,
 	}
-
-	// else create a job
 	return &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + container + "-job",
-			Namespace: namespace,
-			Labels:    labels,
+			GenerateName: cr.Name + "-job-",
+			Namespace:    namespace,
+			Labels:       labels,
 		},
 		Spec: getBatchJobSpec(cr, container, containerID, namespace, node),
 	}
@@ -195,19 +232,15 @@ func createGremlinJob(cr *gremlinv1alpha1.Gremlin, container string, containerID
 // fuction createGremlinCronJob returns a gremlin/gremlin job with the same name/namespace and node as the pod
 // this will create the job with cron schedule
 func createGremlinCronJob(cr *gremlinv1alpha1.Gremlin, container string, containerID string, namespace string, node string) *batchv1beta1.CronJob {
-
 	labels := map[string]string{
 		"app": cr.Name,
 	}
-
-	// if Schedule is present then create a cronjob
 	return &batchv1beta1.CronJob{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + container + "-job",
-			Namespace: namespace,
-			Labels:    labels,
+			GenerateName: cr.Name + "-cronjob-",
+			Namespace:    namespace,
+			Labels:       labels,
 		},
-
 		Spec: getCronJobSpec(cr, container, containerID, namespace, node),
 	}
 }

@@ -15,8 +15,10 @@ spec:
   labels:
     app: nginx
   container_filter: "n([a-z])inx"
-  restart_on_filaure: false
+  restart_on_failure: false
   schedule: "*/1 * * * *"
+  impact_percentage: 100
+  impact_count: 1
   config_override:
     team_id: ""
     team_private_key: ""
