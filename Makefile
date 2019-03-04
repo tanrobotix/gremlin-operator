@@ -40,7 +40,7 @@ format:
 lint:
 	@echo Linting...
 	@golint $(PACKAGES)
-	@gosec -quiet -exclude=G104 $(PACKAGES) 2>/dev/null
+	@gosec -quiet -exclude=G104,G101 $(PACKAGES) 2>/dev/null
 
 .PHONY: build
 build: format
