@@ -47,7 +47,7 @@ build: format
 
 .PHONY: docker
 docker:
-	@docker tag kubedex/gremlin-operator:build "$(BUILD_IMAGE)" .
+	@docker tag kubedex/gremlin-operator:build "$(BUILD_IMAGE)"
 
 .PHONY: push
 push:
