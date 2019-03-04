@@ -43,11 +43,11 @@ lint:
 .PHONY: build
 build: format
 	@echo Building...
-	@operator-sdk build kubedex/gremlin-operator:latest
+	@operator-sdk build kubedex/gremlin-operator:build
 
 .PHONY: docker
 docker:
-	@docker tag kubedex/gremlin-operator:latest "$(BUILD_IMAGE)" .
+	@docker tag kubedex/gremlin-operator:build "$(BUILD_IMAGE)" .
 
 .PHONY: push
 push:
