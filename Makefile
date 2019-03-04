@@ -28,7 +28,7 @@ check:
 
 .PHONY: ensure-generate-is-noop
 ensure-generate-is-noop: generate
-	@git diff -s --exit-code pkg/apis/io/v1alpha1/zz_generated.deepcopy.go || (echo "Build failed: a model has been changed but the deep copy functions aren't up to date. Run 'make generate' and update your PR." && exit 1)
+	@git diff -s --exit-code pkg/apis/gremlin/v1alpha1/zz_generated.deepcopy.go || (echo "Build failed: a model has been changed but the deep copy functions aren't up to date. Run 'make generate' and update your PR." && exit 1)
 
 .PHONY: format
 format:
