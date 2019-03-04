@@ -23,7 +23,6 @@ PACKAGES := $(shell go list ./cmd/... ./pkg/...)
 check:
 	@echo Checking...
 	@go fmt $(PACKAGES) > $(FMT_LOG)
-	@.travis/import-order-cleanup.sh stdout > $(IMPORT_LOG)
 	@[ ! -s "$(FMT_LOG)" -a ! -s "$(IMPORT_LOG)" ] || (echo "Go fmt, license check, or import ordering failures, run 'make format'" | cat - $(FMT_LOG) $(IMPORT_LOG) && false)
 
 .PHONY: ensure-generate-is-noop
@@ -33,7 +32,6 @@ ensure-generate-is-noop: generate
 .PHONY: format
 format:
 	@echo Formatting code...
-	@.travis/import-order-cleanup.sh inplace
 	@go fmt $(PACKAGES)
 
 .PHONY: lint
@@ -45,11 +43,11 @@ lint:
 .PHONY: build
 build: format
 	@echo Building...
-	@${GO_FLAGS} go build -o $(OUTPUT_BINARY) -ldflags $(LD_FLAGS)
+	@operator-sdk build kubedex/gremlin-operator:latest
 
 .PHONY: docker
 docker:
-	@docker build --file build/Dockerfile -t "$(BUILD_IMAGE)" .
+	@docker tag kubedex/gremlin-operator:latest "$(BUILD_IMAGE)" .
 
 .PHONY: push
 push:
@@ -82,18 +80,8 @@ e2e-tests: cassandra es crd build docker push
 run: crd
 	@bash -c 'trap "exit 0" INT; OPERATOR_NAME=${OPERATOR_NAME} KUBERNETES_CONFIG=${KUBERNETES_CONFIG} WATCH_NAMESPACE=${WATCH_NAMESPACE} go run -ldflags ${LD_FLAGS} main.go start'
 
-.PHONY: es
-es:
-	@kubectl create -f ./test/elasticsearch.yml 2>&1 | grep -v "already exists" || true
-
-.PHONY: cassandra
-cassandra:
-	@kubectl create -f ./test/cassandra.yml 2>&1 | grep -v "already exists" || true
-
 .PHONY: clean
 clean:
-	@kubectl delete -f ./test/cassandra.yml || true
-	@kubectl delete -f ./test/elasticsearch.yml || true
 	@kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.18.0/deploy/mandatory.yaml || true
 
 .PHONY: crd
