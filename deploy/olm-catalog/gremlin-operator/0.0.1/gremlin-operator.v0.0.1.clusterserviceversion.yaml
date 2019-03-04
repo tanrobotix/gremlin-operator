@@ -1,0 +1,123 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    capabilities: Basic Install
+  creationTimestamp: null
+  name: gremlin-operator.v0.0.1
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - kind: Gremlin
+      name: gremlins.gremlin.kubedex.com
+      version: v1alpha1
+  description: Placeholder description
+  displayName: Gremlin Operator
+  install:
+    spec:
+      deployments:
+      - name: gremlin-operator
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              name: gremlin-operator
+          strategy: {}
+          template:
+            metadata:
+              creationTimestamp: null
+              labels:
+                name: gremlin-operator
+            spec:
+              containers:
+              - command:
+                - gremlin-operator
+                env:
+                - name: WATCH_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: OPERATOR_NAME
+                  value: gremlin-operator
+                - name: GREMLIN_TEAM_ID
+                - name: GREMLIN_TEAM_CERTIFICATE
+                  value: gremlin-team-cert
+                - name: GREMLIN_TEAM_CERTIFICATE_SECRET_KEY
+                  value: gremlin.cert
+                - name: GREMLIN_TEAM_KEY_SECRET_KEY
+                  value: gremlin.key
+                image: kubedex/gremlin-operator
+                imagePullPolicy: Always
+                name: gremlin-operator
+                resources: {}
+              serviceAccountName: gremlin-operator
+      permissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - batch
+          - pods
+          - services
+          - endpoints
+          - persistentvolumeclaims
+          - events
+          - configmaps
+          - secrets
+          verbs:
+          - '*'
+        - apiGroups:
+          - batch
+          resources:
+          - jobs
+          - cronjobs
+          verbs:
+          - '*'
+        - apiGroups:
+          - ""
+          resources:
+          - namespaces
+          verbs:
+          - get
+        - apiGroups:
+          - apps
+          resources:
+          - deployments
+          - daemonsets
+          - replicasets
+          - statefulsets
+          verbs:
+          - '*'
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - servicemonitors
+          verbs:
+          - get
+          - create
+        - apiGroups:
+          - gremlin.kubedex.com
+          resources:
+          - '*'
+          verbs:
+          - '*'
+        serviceAccountName: gremlin-operator
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  maturity: alpha
+  provider: {}
+  version: 0.0.1

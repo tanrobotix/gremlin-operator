@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gremlin-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gremlin-operator
+  template:
+    metadata:
+      labels:
+        name: gremlin-operator
+    spec:
+      serviceAccountName: gremlin-operator
+      containers:
+        - name: gremlin-operator
+          # Replace this with the built image name
+          image: kubedex/gremlin-operator
+          command:
+          - gremlin-operator
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "gremlin-operator"
+            # Gremlin configuration
+            - name: GREMLIN_TEAM_ID
+              value: ""
+            - name: "GREMLIN_TEAM_CERTIFICATE"
+              value: "gremlin-team-cert"
+            - name: "GREMLIN_TEAM_CERTIFICATE_SECRET_KEY"
+              value: "gremlin.cert"
+            - name: "GREMLIN_TEAM_KEY_SECRET_KEY"
+              value: "gremlin.key"
