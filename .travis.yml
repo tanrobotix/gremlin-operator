@@ -30,6 +30,8 @@ jobs:
       name: "Publish latest image"
       env:
       - OPERATOR_VERSION="${TRAVIS_BRANCH}"
+      install:
+      - "./.travis/install.sh"
       script:
       - "./.travis/publish-images.sh"
 

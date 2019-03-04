@@ -7,9 +7,6 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/Kubedex/gremlin-operator/pkg/apis"
-	"github.com/Kubedex/gremlin-operator/pkg/controller"
-
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"github.com/operator-framework/operator-sdk/pkg/leader"
 	"github.com/operator-framework/operator-sdk/pkg/log/zap"
@@ -21,6 +18,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
+
+	"github.com/Kubedex/gremlin-operator/pkg/apis"
+	"github.com/Kubedex/gremlin-operator/pkg/controller"
 )
 
 // Change below variables to serve metrics on different host or port.

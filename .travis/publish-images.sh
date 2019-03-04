@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASE_BUILD_IMAGE=${BASE_BUILD_IMAGE:-"Kubedex/gremlin-operator"}
+BASE_BUILD_IMAGE=${BASE_BUILD_IMAGE:-"kubedex/gremlin-operator"}
 OPERATOR_VERSION=${OPERATOR_VERSION:-$(git describe --tags)}
 
 ## if we are on a release tag, let's extract the version number
