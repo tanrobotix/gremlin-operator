@@ -168,8 +168,8 @@ func (r *ReconcileGremlin) Reconcile(request reconcile.Request) (reconcile.Resul
 			}
 
 			if !cstatus.Ready {
-				continue
 				reqLogger.Info("Container not ready", "Container", cstatus.Name, "ContainerID", cstatus.ContainerID)
+				continue
 			}
 
 			// Replace docker:// from container id
